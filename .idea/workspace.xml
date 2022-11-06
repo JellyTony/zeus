@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="d01bc797-16b2-4792-8546-9b140b167120" name="变更" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/markdown.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/zeus.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/context/context.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/context/context_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/endpoint/endpoint.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/endpoint/endpoint_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/group/example_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/group/group.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/group/group_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/host/host.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/host/host_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/httputil/http.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/httputil/http_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/matcher/middleware.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/matcher/middleware_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/testdata/binding/generate.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/testdata/binding/test.pb.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/testdata/binding/test.proto" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/testdata/complex/complex.pb.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/testdata/complex/complex.proto" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/testdata/encoding/test.pb.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/testdata/encoding/test.proto" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/testdata/helloworld/generate.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/testdata/helloworld/helloworld.pb.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/testdata/helloworld/helloworld.proto" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/testdata/helloworld/helloworld_grpc.pb.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/testdata/helloworld/helloworld_http.pb.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/calloption.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/calloption_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/client.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/client_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/codec.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/codec_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/context.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/context_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/filter.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/redirect.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/redirect_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/resolver.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/resolver_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/router.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/router_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/server.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/server_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/transport.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transport/http/transport_test.go" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="GOROOT" url="file:///opt/homebrew/Cellar/go/1.19.2/libexec" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GoLibraries">
+    <option name="indexEntireGoPath" value="true" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2HBEdoVnrIUeFxKSCLNhjIHGFwJ" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
+    "RunOnceActivity.go.watchers.conflict.with.on.save.actions.check.performed": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "go.import.settings.migrated": "true",
+    "go.sdk.automatically.set": "true",
+    "last_opened_file_path": "/Users/jeffreybool/code/go/src/github.com/JellyTony/zeus",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "settings.editor.selected.configurable": "MTConfigurable"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration name="go test github.com/JellyTony/zeus/transport/http" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="zeus" />
+      <working_directory value="$PROJECT_DIR$/transport/http" />
+      <kind value="PACKAGE" />
+      <package value="github.com/JellyTony/zeus/transport/http" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go 测试.go test github.com/JellyTony/zeus/transport/http" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
+  <component name="VgoProject">
+    <integration-enabled>false</integration-enabled>
+    <settings-migrated>true</settings-migrated>
+  </component>
+</project>
