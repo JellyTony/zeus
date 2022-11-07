@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/JellyTony/zeus/internal/host"
+	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
 )
 
 const appJSONStr = "application/json"
@@ -40,6 +42,17 @@ func authFilter(next http.Handler) http.Handler {
 	})
 }
 
+func customMiddleware() middleware.Middleware {
+	return func(handler middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+			if tr, ok := transport.FromServerContext(ctx); ok {
+				fmt.Println("operation:", tr.Operation())
+			}
+			reply, err = handler(ctx, req)
+			return
+		}
+	}
+}
 func loggingFilter(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Do stuff here
@@ -55,11 +68,11 @@ func TestRoute(t *testing.T) {
 		Filter(corsFilter, loggingFilter),
 	)
 	route := srv.Route("/v1")
-	route.GET("/users/{name}", func(ctx Context) error {
+	route.GET("/users/:name", func(ctx Context) error {
 		u := new(User)
-		u.Name = ctx.Vars().Get("name")
+		u.Name = ctx.Param("name")
 		return ctx.Result(200, u)
-	}, authFilter)
+	}, customMiddleware())
 	route.POST("/users", func(ctx Context) error {
 		u := new(User)
 		if err := ctx.Bind(u); err != nil {
@@ -173,7 +186,7 @@ func testRoute(t *testing.T, srv *Server) {
 
 func TestRouter_Group(t *testing.T) {
 	r := &Router{}
-	rr := r.Group("a", func(http.Handler) http.Handler { return nil })
+	rr := r.Group("a")
 	if !reflect.DeepEqual("a", rr.prefix) {
 		t.Errorf("expected %q, got %q", "a", rr.prefix)
 	}

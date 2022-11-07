@@ -9,8 +9,21 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 )
 
-// FilterChain return middlewares wrapper
-func FilterChain(m ...middleware.Middleware) gin.HandlerFunc {
+// FilterFunc is a function which receives a http.Handler and returns another http.Handler.
+type FilterFunc func(http.Handler) http.Handler
+
+// FilterChain returns a FilterFunc that specifies the chained handler for HTTP Router.
+func FilterChain(filters ...FilterFunc) FilterFunc {
+	return func(next http.Handler) http.Handler {
+		for i := len(filters) - 1; i >= 0; i-- {
+			next = filters[i](next)
+		}
+		return next
+	}
+}
+
+// Middlewares return middlewares wrapper
+func Middlewares(m ...middleware.Middleware) gin.HandlerFunc {
 	chain := middleware.Chain(m...)
 	return func(c *gin.Context) {
 		next := func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -27,7 +40,11 @@ func FilterChain(m ...middleware.Middleware) gin.HandlerFunc {
 		if ginCtx, ok := FromGinContext(ctx); ok {
 			SetOperation(ctx, ginCtx.FullPath())
 		}
-		next(c.Request.Context(), c.Request)
+
+		_, err := next(c.Request.Context(), c.Request)
+		if err != nil {
+			c.Error(err)
+		}
 	}
 }
 

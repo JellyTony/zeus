@@ -55,6 +55,13 @@ func Middleware(m ...middleware.Middleware) ServerOption {
 	}
 }
 
+// Filter with HTTP middleware option.
+func Filter(filters ...FilterFunc) ServerOption {
+	return func(o *Server) {
+		o.filters = filters
+	}
+}
+
 // RequestVarsDecoder with request decoder.
 func RequestVarsDecoder(dec DecodeRequestFunc) ServerOption {
 	return func(o *Server) {
@@ -123,6 +130,7 @@ type Server struct {
 	network     string
 	address     string
 	timeout     time.Duration
+	filters     []FilterFunc
 	middleware  matcher.Matcher
 	decVars     DecodeRequestFunc
 	decQuery    DecodeRequestFunc
@@ -156,7 +164,7 @@ func NewServer(opts ...ServerOption) *Server {
 	srv.engine.Use(srv.filter())
 
 	srv.Server = &http.Server{
-		Handler:   srv.engine,
+		Handler:   FilterChain(srv.filters...)(srv.engine),
 		TLSConfig: srv.tlsConf,
 	}
 	return srv
@@ -205,6 +213,10 @@ func (s *Server) HandleFunc(path string, h http.HandlerFunc) {
 // ServeHTTP should write reply headers and data to the ResponseWriter and then return.
 func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	s.Handler.ServeHTTP(res, req)
+}
+
+func (s *Server) Engine() *gin.Engine {
+	return s.engine
 }
 
 func (s *Server) filter() gin.HandlerFunc {

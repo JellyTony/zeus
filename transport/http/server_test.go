@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -14,7 +15,9 @@ import (
 	"time"
 
 	"github.com/JellyTony/zeus/internal/host"
-	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/gin-gonic/gin"
+	kratoserrors "github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/middleware"
 )
 
 var h = func(w http.ResponseWriter, r *http.Request) {
@@ -48,9 +51,9 @@ func TestServeHTTP(t *testing.T) {
 	mux := NewServer(Listener(ln))
 	mux.HandleFunc("/index", h)
 	mux.Route("/errors").GET("/cause", func(ctx Context) error {
-		return errors.BadRequest("xxx", "zzz").
+		return kratoserrors.BadRequest("xxx", "zzz").
 			WithMetadata(map[string]string{"foo": "bar"}).
-			WithCause(fmt.Errorf("error cause"))
+			WithCause(errors.New("error cause"))
 	})
 	if err = mux.WalkRoute(func(r RouteInfo) error {
 		t.Logf("WalkRoute: %+v", r)
@@ -64,7 +67,7 @@ func TestServeHTTP(t *testing.T) {
 	srv := http.Server{Handler: mux}
 	go func() {
 		if err := srv.Serve(ln); err != nil {
-			if errors.Is(err, http.ErrServerClosed) {
+			if kratoserrors.Is(err, http.ErrServerClosed) {
 				return
 			}
 			panic(err)
@@ -78,14 +81,69 @@ func TestServeHTTP(t *testing.T) {
 
 func TestServer(t *testing.T) {
 	ctx := context.Background()
-	srv := NewServer()
+	srv := NewServer(Address(":9095"))
 	srv.Handle("/index", newHandleFuncWrapper(h))
-	srv.HandleFunc("/index/{id:[0-9]+}", h)
+	srv.HandleFunc("/index/:id", h)
 	srv.HandlePrefix("/test/prefix", newHandleFuncWrapper(h))
 	srv.Route("/errors").GET("/cause", func(ctx Context) error {
-		return errors.BadRequest("xxx", "zzz").
+		return kratoserrors.BadRequest("xxx", "zzz").
 			WithMetadata(map[string]string{"foo": "bar"}).
-			WithCause(fmt.Errorf("error cause"))
+			WithCause(errors.New("error cause"))
+	})
+
+	srv.Route("/demo", func(handler middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req interface{}) (interface{}, error) {
+			fmt.Println("Route middleware start")
+			resp, err := handler(ctx, req)
+			if err != nil {
+				return nil, err
+			}
+			fmt.Println("Route middleware stop")
+			return resp, nil
+		}
+	}, func(handler middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req interface{}) (interface{}, error) {
+			fmt.Println("Route middleware2 start")
+			resp, err := handler(ctx, req)
+			if err != nil {
+				return nil, err
+			}
+			fmt.Println("Route middleware2 stop")
+			return resp, nil
+		}
+	}).GET("/index", func(ctx Context) error {
+		fmt.Println("Route handler start")
+		err := ctx.JSON(200, "success")
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("Route handler stop")
+		return nil
+	}, func(handler middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+			fmt.Println("custom middleware start")
+			resp, err := handler(ctx, req)
+			if err != nil {
+				return nil, err
+			}
+			fmt.Println("custom middleware stop")
+			return resp, nil
+		}
+	}, func(handler middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+			fmt.Println("custom middleware2 start")
+			resp, err := handler(ctx, req)
+			if err != nil {
+				return nil, err
+			}
+			fmt.Println("custom middleware2 stop")
+			return resp, nil
+		}
+	})
+
+	srv.Engine().GET("/engine", func(ctx *gin.Context) {
+		ctx.JSON(200, "success")
 	})
 
 	if e, err := srv.Endpoint(); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
@@ -101,7 +159,7 @@ func TestServer(t *testing.T) {
 	testHeader(t, srv)
 	testClient(t, srv)
 	testAccept(t, srv)
-	time.Sleep(time.Second)
+	time.Sleep(1 * time.Second)
 	if srv.Stop(ctx) != nil {
 		t.Errorf("expected nil got %v", srv.Stop(ctx))
 	}
@@ -113,8 +171,8 @@ func testAccept(t *testing.T, srv *Server) {
 		path        string
 		contentType string
 	}{
-		{"GET", "/errors/cause", "application/json"},
-		{"GET", "/errors/cause", "application/proto"},
+		{http.MethodGet, "/errors/cause", "application/json"},
+		{http.MethodGet, "/errors/cause", "application/proto"},
 	}
 	e, err := srv.Endpoint()
 	if err != nil {
@@ -131,7 +189,7 @@ func testAccept(t *testing.T, srv *Server) {
 		}
 		req.Header.Set("Content-Type", test.contentType)
 		resp, err := client.Do(req)
-		if errors.Code(err) != 400 {
+		if kratoserrors.Code(err) != 400 {
 			t.Errorf("expected 400 got %v", err)
 		}
 		if err == nil {
@@ -150,7 +208,7 @@ func testHeader(t *testing.T, srv *Server) {
 		t.Errorf("expected nil got %v", err)
 	}
 	reqURL := fmt.Sprintf(e.String() + "/index")
-	req, err := http.NewRequest("GET", reqURL, nil)
+	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
 	if err != nil {
 		t.Errorf("expected nil got %v", err)
 	}
@@ -168,21 +226,21 @@ func testClient(t *testing.T, srv *Server) {
 		path   string
 		code   int
 	}{
-		{"GET", "/index", http.StatusOK},
-		{"PUT", "/index", http.StatusOK},
-		{"POST", "/index", http.StatusOK},
-		{"PATCH", "/index", http.StatusOK},
-		{"DELETE", "/index", http.StatusOK},
+		{http.MethodGet, "/index", http.StatusOK},
+		{http.MethodPut, "/index", http.StatusOK},
+		{http.MethodPost, "/index", http.StatusOK},
+		{http.MethodPatch, "/index", http.StatusOK},
+		{http.MethodDelete, "/index", http.StatusOK},
 
-		{"GET", "/index/1", http.StatusOK},
-		{"PUT", "/index/1", http.StatusOK},
-		{"POST", "/index/1", http.StatusOK},
-		{"PATCH", "/index/1", http.StatusOK},
-		{"DELETE", "/index/1", http.StatusOK},
+		{http.MethodGet, "/index/1", http.StatusOK},
+		{http.MethodPut, "/index/1", http.StatusOK},
+		{http.MethodPost, "/index/1", http.StatusOK},
+		{http.MethodPatch, "/index/1", http.StatusOK},
+		{http.MethodDelete, "/index/1", http.StatusOK},
 
-		{"GET", "/index/notfound", http.StatusNotFound},
-		{"GET", "/errors/cause", http.StatusBadRequest},
-		{"GET", "/test/prefix/123111", http.StatusOK},
+		{http.MethodGet, "/index/111/notfound", http.StatusNotFound},
+		{http.MethodGet, "/errors/cause", http.StatusBadRequest},
+		{http.MethodGet, "/test/prefix", http.StatusOK},
 	}
 	e, err := srv.Endpoint()
 	if err != nil {
@@ -200,8 +258,9 @@ func testClient(t *testing.T, srv *Server) {
 		if err != nil {
 			t.Fatal(err)
 		}
+
 		resp, err := client.Do(req)
-		if errors.Code(err) != test.code {
+		if kratoserrors.Code(err) != test.code {
 			t.Fatalf("want %v, but got %v", test, err)
 		}
 		if err != nil {
@@ -218,6 +277,7 @@ func testClient(t *testing.T, srv *Server) {
 		}
 		err = json.Unmarshal(content, &res)
 		if err != nil {
+			t.Logf("methid: %s, path: %s, code: %d", test.method, test.path, test.code)
 			t.Fatalf("unmarshal resp error %v", err)
 		}
 		if res.Path != test.path {
@@ -227,7 +287,7 @@ func testClient(t *testing.T, srv *Server) {
 	for _, test := range tests {
 		var res testData
 		err := client.Invoke(context.Background(), test.method, test.path, nil, &res)
-		if errors.Code(err) != test.code {
+		if kratoserrors.Code(err) != test.code {
 			t.Fatalf("want %v, but got %v", test, err)
 		}
 		if err != nil {
@@ -269,7 +329,7 @@ func BenchmarkServer(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		var res testData
-		err := client.Invoke(context.Background(), "POST", "/index", nil, &res)
+		err := client.Invoke(context.Background(), http.MethodPost, "/index", nil, &res)
 		if err != nil {
 			b.Errorf("expected nil got %v", err)
 		}
@@ -312,8 +372,8 @@ func TestRequestDecoder(t *testing.T) {
 	o := &Server{}
 	v := func(*http.Request, interface{}) error { return nil }
 	RequestDecoder(v)(o)
-	if o.dec == nil {
-		t.Errorf("expected nil got %v", o.dec)
+	if o.decBody == nil {
+		t.Errorf("expected nil got %v", o.decBody)
 	}
 }
 

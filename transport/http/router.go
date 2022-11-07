@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"net/http"
 	"path"
 	"sync"
@@ -55,16 +56,25 @@ func (r *Router) Handle(method, relativePath string, h HandlerFunc, filters ...m
 		ctx := r.pool.Get().(*wrapper)
 		ctx.Context = c
 		ctx.Reset(c.Writer, c.Request)
-		if err := h(ctx); err != nil {
-			r.srv.ene(c.Writer, c.Request, err)
+
+		ms := make([]middleware.Middleware, 0, len(r.filters)+len(filters))
+		ms = append(ms, r.filters...)
+		ms = append(ms, filters...)
+		chain := middleware.Chain(ms...)
+		nt := func(cc context.Context, req interface{}) (interface{}, error) {
+			err := h(ctx)
+			if err != nil {
+				r.srv.ene(c.Writer, c.Request, err)
+			}
+			return c.Writer, err
 		}
+		nt = chain(nt)
+		_, _ = nt(c.Request.Context(), c.Request)
 		ctx.Reset(nil, nil)
 		ctx.Context = nil
 		r.pool.Put(ctx)
 	}
 
-	next = FilterChain(filters...)
-	next = FilterChain(r.filters...)
 	r.srv.engine.Handle(method, path.Join(r.prefix, relativePath), next)
 }
 
