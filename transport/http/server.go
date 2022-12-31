@@ -244,7 +244,20 @@ func (s *Server) filter() gin.HandlerFunc {
 		}
 		tr.request = c.Request.WithContext(transport.NewServerContext(ctx, tr))
 		c.Request = tr.request
-		c.Next()
+
+		h := func(ctx context.Context, req interface{}) (interface{}, error) {
+			c.Next()
+			return nil, nil
+		}
+
+		if next := s.middleware.Match(tr.Operation()); len(next) > 0 {
+			h = middleware.Chain(next...)(h)
+		}
+
+		_, err := h(ctx, c.Request)
+		if err != nil {
+			_ = c.Error(err)
+		}
 	}
 }
 
